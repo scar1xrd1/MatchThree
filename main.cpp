@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+﻿#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <thread>
@@ -6,35 +6,59 @@
 using namespace std;
 using namespace sf;
 
+
+
 class Button
 {
     int x, y;
     int r, g, b;
+    int row, column;
     Music sound_pressed;
     RectangleShape btn;
+
 
 public:
     Button() {}
 
-    Button(int x, int y, int r, int g, int b) : x(x), y(y), r(r), g(g), b(b)
+    Button(int x, int y, int row, int column, int r, int g, int b) : x(x), y(y), row(row), column(column), r(r), g(g), b(b)
     {
         btn.setSize(Vector2f(100, 100));
         btn.setPosition(x, y);
         btn.setFillColor(Color(r, g, b));
+        
     }
 
-    void check(Vector2i mouseP)
+    void target() {
+        btn.setFillColor(Color(btn.getFillColor().r + 25, btn.getFillColor().g + 25, btn.getFillColor().b + 25));
+        cout << "target" << endl;
+    }
+
+    void untarget() {
+        btn.setFillColor(Color(btn.getFillColor().r - 25, btn.getFillColor().g - 25, btn.getFillColor().b - 25));
+    }
+
+    void press()
     {
-        if (btn.getGlobalBounds().contains(mouseP.x, mouseP.y))
-        {
-            srand(time(0));
-            cout << "PRessed\n";
-            
-            btn.setFillColor(Color(1 + rand() % (255 - 1 + 1), 1 + rand() % (255 - 1 + 1), 1 + rand() % (255 - 1 + 1)));
-            
-            sound_pressed.openFromFile("sounds/mouse_click.wav");//��������� ����  
-            sound_pressed.play();
-        }
+        //srand(time(0));
+        cout << "PRessed\n";
+        target();
+        sound_pressed.openFromFile("sounds/mouse_click.wav");//çàãðóæàåì ôàéë  
+        sound_pressed.play();
+        
+    }
+
+    void press(Button& btn1)
+    {
+        //srand(time(0));
+        cout << "PRessed 2nd\n";
+        //target();
+        //btn.setFillColor(Color(btn.getFillColor().r - 25, btn.getFillColor().g - 25, btn.getFillColor().b - 25));
+        sound_pressed.openFromFile("sounds/mouse_click.wav");//çàãðóæàåì ôàéë  
+        sound_pressed.play();
+        this_thread::sleep_for(chrono::milliseconds(1000));
+        //untarget();
+        //btn.setFillColor(Color(btn.getFillColor().r + 25, btn.getFillColor().g + 25, btn.getFillColor().b + 25));
+        btn1.untarget();
     }
 
     RectangleShape show()
@@ -51,38 +75,64 @@ public:
     }
 };
 
+class Field {
+private:
+    Button** button;
+    int width, height;
+    int colors[6][3]{ {101, 83, 172}, {188, 76, 67}, {67, 188, 76}, {67, 188, 76}, {194, 193, 61}, {61, 194, 193} };
+    bool pressed;
+    int pressedButton[2];
+public:
+
+    Field(int w, int h) : width(w), height(h) {
+        pressed = false;
+        button = new Button * [height];
+        for (int i = 0; i < height; i++)//buttons array creation
+        {
+            button[i] = new Button[width];
+        }
+
+        int posX = 0;
+        int posY;
+        for (int i = 0; i < width; i++)//buttons array filling
+        {
+            posY = 0;
+            for (int j = 0; j < height; j++)
+            {
+                int r = rand() % (5 + 1);
+                button[j][i] = Button(posX, posY, j, i, colors[r][0], colors[r][1], colors[r][2]);
+                posY += 100;
+            }
+            posX += 100;
+        }
+    }
+
+    void ButtonPress(int i, int j) {
+        if (!pressed) {
+            button[i][j].press();
+            pressedButton[0] = i;
+            pressedButton[1] = j;
+        }
+        else {
+            button[i][j].press(button[pressedButton[0]][pressedButton[1]]);
+        }
+        pressed = !pressed;
+    }
+
+    Button& getButton(int i, int j) {
+        return button[i][j];
+    }
+};
+
 int main()
 {
     RenderWindow window(VideoMode(600, 600), "Hello");
     window.setVerticalSyncEnabled(true);
     srand(time(0));
 
-    int pos1 = 0;
-    int pos2 = 0;
-    int stop = 0;
+    
 
-    int focus = 0;
-
-    int focus_x1 = 0;
-    int focus_x2 = 0;
-    int focus_y1 = 0;
-    int focus_y2 = 0;
-
-    Button button[6][6];
-
-    int posX = 0;
-    int posY;
-    for (int i = 0; i < 6; i++)
-    {
-        posY = 0;
-        for (int j = 0; j < 6; j++)
-        {
-            button[i][j] = Button(posX, posY, 1 + rand() % (500 - 1 + 1), 1 + rand() % (500 - 1 + 1), 1 + rand() % (500 - 1 + 1));
-            posY += 100;
-        }  
-        posX += 100;
-    }
-
+    Field field(6, 6);
     while (window.isOpen())
     {
         Vector2i mousePos = Mouse::getPosition(window);
@@ -95,13 +145,9 @@ int main()
 
             if (event.type == Event::MouseButtonPressed)
             {
-                for (int i = 0; i < 6; i++)
-                {
-                    for (int j = 0; j < 6; j++)
-                    {
-                        button[i][j].check(mousePos);
-                    }                    
-                }                
+                cout << mousePos.x / 100 << mousePos.y / 100;
+                //button[mousePos.y / 100][mousePos.x / 100].press();
+                field.ButtonPress(mousePos.y / 100, mousePos.x / 100);
             }
         }
 
@@ -110,7 +156,7 @@ int main()
         {
             for (int j = 0; j < 6; j++)
             {
-                window.draw(button[i][j].show());
+                window.draw(field.getButton(i, j).show());
             }
             
         }
