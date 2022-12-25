@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+ï»¿#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <thread>
@@ -8,114 +8,122 @@ using namespace sf;
 
 class Button
 {
-    int x, y;
-    int r, g, b;
-    Music sound_pressed;
-    RectangleShape btn;
+	string sColor;
+
+	int x, y;
+	int current_color;
+	int iColor[6][3] = { {255,0,0}, {95,0,0}, {250,128,114}, {178,34,34}, {205,92,92}, {220,20,60} };
+	RectangleShape btn;
 
 public:
-    Button() {}
+	Button() { btn.setSize(Vector2f(100, 100)); }
 
-    Button(int x, int y, int r, int g, int b) : x(x), y(y), r(r), g(g), b(b)
-    {
-        btn.setSize(Vector2f(100, 100));
-        btn.setPosition(x, y);
-        btn.setFillColor(Color(r, g, b));
-    }
+	Button(int x, int y, int color) : current_color(color), x(x), y(y)
+	{
+		btn.setSize(Vector2f(100, 100));
+		btn.setFillColor(Color(iColor[color][0], iColor[color][1], iColor[color][2]));
+		btn.setPosition(x, y);
+	}
 
-    void check(Vector2i mouseP)
-    {
-        if (btn.getGlobalBounds().contains(mouseP.x, mouseP.y))
-        {
-            srand(time(0));
-            cout << "PRessed\n";
-            
-            btn.setFillColor(Color(1 + rand() % (255 - 1 + 1), 1 + rand() % (255 - 1 + 1), 1 + rand() % (255 - 1 + 1)));
-            
-            sound_pressed.openFromFile("sounds/mouse_click.wav");//çàãðóæàåì ôàéë  
-            sound_pressed.play();
-        }
-    }
+	RectangleShape show() { return btn; }
 
-    RectangleShape show()
-    {
-        return btn;
-    }
+	int get_xy(string value)
+	{
+		if (value == "x") return x;
+		if (value == "y") return y;
+	}
+	
+	int get_color() { return current_color; }
 
-    Button & operator = (const Button& obj)
-    {
-        btn.setSize(Vector2f(100, 100));
-        btn.setPosition(obj.x, obj.y);
-        btn.setFillColor(Color(obj.r, obj.g, obj.b));
-        return *this;
-    }
+	void set(string data, int value1, int value2)
+	{
+		if (data == "xy")
+		{
+			x = value1; y = value2;
+			btn.setPosition(x, y);
+		}
+	}
+	
+	void set(string data, int value1)
+	{
+		if (data == "color")
+		{
+			btn.setFillColor(Color(iColor[value1][0], iColor[value1][1], iColor[value1][2]));
+		}
+	}
+
+	void swap(Button& other)
+	{
+
+	}
+};
+
+class Field
+{
+	Button button[6][6];
+	int x, y;
+
+public:
+	Field(int width, int height)
+	{
+		srand(time(0));
+
+		x = 0;
+		for (int i = 0; i < width; i++)
+		{			
+			y = 0;
+			for (int j = 0; j < height; j++)
+			{				
+				button[i][j] = Button(x, y, 0 + rand() % (5 + 0 - 1));
+				y += 102;
+			}
+			x += 102;
+		}
+
+		/*Button buffer(5000, 5000, 0);
+
+		button[0][0] = Button(0, 0, 5);
+		button[1][0] = Button(102, 0, 2);
+		button[2][0] = Button(204, 0, 5);
+
+
+		Ð”ÐžÐ”Ð•Ð›ÐÐ¢Ð¬ !!!!!!!!!!!!!!!!!! Ð”ÐžÐ”Ð•Ð›ÐÐ¢ÑŒ
+
+		buffer.set("xy", button[0][0].get_xy("x"), button[0][0].get_xy("y"));
+		buffer.set("color", button[0][0].get_color());
+
+		cout << button[0][0].get_color() << endl;
+
+		button[0][0] = Button(button[1][0].get_xy("x"), button[1][0].get_xy("y"), button[1][0].get_color());
+
+		button[1][0] = Button(buffer.get_xy("x"), buffer.get_xy("y"), buffer.get_color());*/
+	}
+
+	RectangleShape show(int x, int y) { return button[x][y].show(); }
 };
 
 int main()
 {
-    RenderWindow window(VideoMode(600, 600), "Hello");
-    window.setVerticalSyncEnabled(true);
-    srand(time(0));
+	system("chcp 1251");
+	system("cls");
 
-    int pos1 = 0;
-    int pos2 = 0;
-    int stop = 0;
+	RenderWindow window(VideoMode(610, 610), "MatchThree");
 
-    int focus = 0;
+	Field field(6, 6);
 
-    int focus_x1 = 0;
-    int focus_x2 = 0;
-    int focus_y1 = 0;
-    int focus_y2 = 0;
+	while (window.isOpen())
+	{
+		Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == Event::Closed) window.close();
+		}
 
-    Button button[6][6];
+		window.clear();
 
-    int posX = 0;
-    int posY;
-    for (int i = 0; i < 6; i++)
-    {
-        posY = 0;
-        for (int j = 0; j < 6; j++)
-        {
-            button[i][j] = Button(posX, posY, 1 + rand() % (500 - 1 + 1), 1 + rand() % (500 - 1 + 1), 1 + rand() % (500 - 1 + 1));
-            posY += 100;
-        }  
-        posX += 100;
-    }
+		for (int i = 0; i < 6; i++) for (int j = 0; j < 6; j++)
+			window.draw(field.show(i, j));
 
-    while (window.isOpen())
-    {
-        Vector2i mousePos = Mouse::getPosition(window);
-
-        Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == Event::Closed)
-                window.close();
-
-            if (event.type == Event::MouseButtonPressed)
-            {
-                for (int i = 0; i < 6; i++)
-                {
-                    for (int j = 0; j < 6; j++)
-                    {
-                        button[i][j].check(mousePos);
-                    }                    
-                }                
-            }
-        }
-
-        window.clear();
-        for (int i = 0; i < 6; i++)
-        {
-            for (int j = 0; j < 6; j++)
-            {
-                window.draw(button[i][j].show());
-            }
-            
-        }
-        window.display();
-    }
-
-    return 0;
+		window.display();
+	}	
 }
