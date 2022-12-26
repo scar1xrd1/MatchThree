@@ -2,6 +2,7 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <thread>
+#include <ctime>
 #include <chrono>
 using namespace std;
 using namespace sf;
@@ -12,7 +13,8 @@ class Button
 
 	int x, y;
 	int current_color;
-	int iColor[6][3] = { {255,0,0}, {95,0,0}, {250,128,114}, {178,34,34}, {205,92,92}, {220,20,60} };
+	//int iColor[6][3] = { {255,0,0}, {95,0,0}, {250,128,114}, {178,34,34}, {205,92,92}, {220,20,60} };
+	int iColor[6][3]{ {101, 83, 172}, {188, 76, 67}, {67, 188, 76}, {193, 61, 194}, {194, 193, 61}, {61, 194, 193} };
 	RectangleShape btn;
 
 public:
@@ -74,7 +76,7 @@ public:
 			y = 0;
 			for (int j = 0; j < height; j++)
 			{				
-				button[i][j] = Button(x, y, 0 + rand() % (5 + 0 - 1));
+				button[i][j] = Button(x, y, 0 + rand() % (5 + 1));
 				y += 102;
 			}
 			x += 102;
@@ -106,7 +108,7 @@ int main()
 {
 	system("chcp 1251");
 	system("cls");
-
+	srand(time(0));
 	RenderWindow window(VideoMode(610, 610), "MatchThree");
 
 	Field field(6, 6);
