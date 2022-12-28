@@ -1,167 +1,430 @@
-﻿#include <SFML/Graphics.hpp>
+﻿#include <SFML/Graphics.hpp>//254 line
 #include <SFML/Audio.hpp>
 #include <iostream>
+#include <windows.h>
 #include <thread>
+#include <ctime>
 #include <chrono>
+#include <mutex>
+#include <future>
 using namespace std;
 using namespace sf;
 
-
+void beep(int freq, int m)
+{
+	Beep(freq, m);
+}
 
 class Button
 {
-    int x, y;
-    int r, g, b;
-    int row, column;
-    Music sound_pressed;
-    RectangleShape btn;
+	string sColor;
 
+	bool pressed = false;
+	int x, y;
+	int current_color;
+	int id;// for combinations checking
+	//int iColor[6][3] = { {255,0,0}, {95,0,0}, {250,128,114}, {178,34,34}, {205,92,92}, {220,20,60} };
+	int iColor[7][3]{ {101, 83, 172}, {188, 76, 67}, {67, 188, 76}, {193, 61, 194}, {194, 193, 61}, {61, 194, 193}, {0, 0, 0} };
+	RectangleShape btn;
 
 public:
-    Button() {}
+	Button() { btn.setSize(Vector2f(100, 100)); }
 
-    Button(int x, int y, int row, int column, int r, int g, int b) : x(x), y(y), row(row), column(column), r(r), g(g), b(b)
-    {
-        btn.setSize(Vector2f(100, 100));
-        btn.setPosition(x, y);
-        btn.setFillColor(Color(r, g, b));
-        
-    }
+	Button(int x, int y, int color, int id, int size) : current_color(color), x(x), y(y), id(id)
+	{
+		btn.setSize(Vector2f(size, size));
+		btn.setFillColor(Color(iColor[color][0], iColor[color][1], iColor[color][2]));
+		btn.setPosition(x, y);
+	}
 
-    void target() {
-        btn.setFillColor(Color(btn.getFillColor().r + 25, btn.getFillColor().g + 25, btn.getFillColor().b + 25));
-        cout << "target" << endl;
-    }
+	RectangleShape show() { return btn; }
 
-    void untarget() {
-        btn.setFillColor(Color(btn.getFillColor().r - 25, btn.getFillColor().g - 25, btn.getFillColor().b - 25));
-    }
+	int get_xy(string value)
+	{
+		if (value == "x") return x;
+		if (value == "y") return y;
+	}
 
-    void press()
-    {
-        //srand(time(0));
-        cout << "PRessed\n";
-        target();
-        sound_pressed.openFromFile("sounds/mouse_click.wav");//çàãðóæàåì ôàéë  
-        sound_pressed.play();
-        
-    }
+	int get_color() { return current_color; }
 
-    void press(Button& btn1)
-    {
-        //srand(time(0));
-        cout << "PRessed 2nd\n";
-        //target();
-        //btn.setFillColor(Color(btn.getFillColor().r - 25, btn.getFillColor().g - 25, btn.getFillColor().b - 25));
-        sound_pressed.openFromFile("sounds/mouse_click.wav");//çàãðóæàåì ôàéë  
-        sound_pressed.play();
-        this_thread::sleep_for(chrono::milliseconds(1000));
-        //untarget();
-        //btn.setFillColor(Color(btn.getFillColor().r + 25, btn.getFillColor().g + 25, btn.getFillColor().b + 25));
-        btn1.untarget();
-    }
+	int get_id() { return id; }
 
-    RectangleShape show()
-    {
-        return btn;
-    }
+	void set(string data, int value1, int value2)
+	{
+		if (data == "xy")
+		{
+			x = value1; y = value2;
+			btn.setPosition(x, y);
+		}
+	}
 
-    Button & operator = (const Button& obj)
-    {
-        btn.setSize(Vector2f(100, 100));
-        btn.setPosition(obj.x, obj.y);
-        btn.setFillColor(Color(obj.r, obj.g, obj.b));
-        return *this;
-    }
+	void set(string data, int value1)
+	{
+		if (data == "color")
+		{
+			current_color = value1;
+			btn.setFillColor(Color(iColor[value1][0], iColor[value1][1], iColor[value1][2]));
+		}
+		else if (data == "target")
+		{
+			btn.setFillColor(Color(iColor[current_color][0] + 25, iColor[current_color][1] + 25, iColor[current_color][2] + 25));
+		}
+		else if (data == "untarget")
+		{
+			btn.setFillColor(Color(iColor[current_color][0], iColor[current_color][1], iColor[current_color][2]));
+		}
+	}
+
+	void swap(Button& other)
+	{
+		int a = current_color;
+		set("color", other.get_color());
+		other.set("color", a);
+	}
+
+	void press(string value)
+	{
+		if (!pressed) set(value, 0);
+	}
 };
 
-class Field {
-private:
-    Button** button;
-    int width, height;
-    int colors[6][3]{ {101, 83, 172}, {188, 76, 67}, {67, 188, 76}, {67, 188, 76}, {194, 193, 61}, {61, 194, 193} };
-    bool pressed;
-    int pressedButton[2];
+class Field
+{
+	Button** button;
+	//Button button[6][6];
+	int x, y;
+	int width, height;
+
+	int pressed; // to move objects selected by the player
+	int press[2];
+
+	int player_point = 0; // for gameplay
+
 public:
+	Field(int width, int height) : width(width), height(height)
+	{
+		//std::mutex mtx;
+		int size = std::min((100 / (int)pow(2, width / 13) + 2), (100 / (int)pow(2, height / 7) + 2));
+		button = new Button * [height];
+		for (int i = 0; i < height; i++) button[i] = new Button[width];
 
-    Field(int w, int h) : width(w), height(h) {
-        pressed = false;
-        button = new Button * [height];
-        for (int i = 0; i < height; i++)//buttons array creation
-        {
-            button[i] = new Button[width];
-        }
+		thread* th = new thread[width];//threads array
+		for (int i = 0; i < width; i++)
+		{
+			th[i] = thread([=] {
+				srand(time(0) - width + (time_t)i);//this allows to asynchronise random even when a second passes while creating threads
+			int x = (size + 2) * i;
+			y = 0;
+			for (int j = 0; j < height; j++)
+			{
+				button[j][i] = Button(x, y, random(0, 5), j * width + i, size);//[j][i] generates by columns
+				y += (size + 2);
+			}
+				});//creating threads for each column generation
+			th[i].join();
+		}
+		//for a test
+		/*button[0][0].set("color", 0);
+		button[1][0].set("color", 0);
+		button[2][0].set("color", 0);
+		button[0][1].set("color", 0);
+		button[0][2].set("color", 0);*/
+		Clean();
+	}
 
-        int posX = 0;
-        int posY;
-        for (int i = 0; i < width; i++)//buttons array filling
-        {
-            posY = 0;
-            for (int j = 0; j < height; j++)
-            {
-                int r = rand() % (5 + 1);
-                button[j][i] = Button(posX, posY, j, i, colors[r][0], colors[r][1], colors[r][2]);
-                posY += 100;
-            }
-            posX += 100;
-        }
-    }
+	int random(int a, int b) { return a + rand() % (b - a + 1); }
 
-    void ButtonPress(int i, int j) {
-        if (!pressed) {
-            button[i][j].press();
-            pressedButton[0] = i;
-            pressedButton[1] = j;
-        }
-        else {
-            button[i][j].press(button[pressedButton[0]][pressedButton[1]]);
-        }
-        pressed = !pressed;
-    }
+	void deleteButton(int id) {
+		button[id / width][id % width].set("color", 6);
+	}
 
-    Button& getButton(int i, int j) {
-        return button[i][j];
-    }
+	int Clean() {
+
+		thread* th = new thread[width];
+		vector<vector<Button>> verticalMatches;
+		for (int i = 0; i < width; i++)
+		{
+			th[i] = thread([&] {
+
+				vector<Button> column;
+			column.push_back(button[0][i]);
+			for (int j = 1; j < height; j++)
+			{
+				if (button[j][i].get_color() != column[0].get_color()) {
+					if (column.size() >= 3) verticalMatches.push_back(column);
+					column.clear();
+				}
+				column.push_back(button[j][i]);
+			}
+			if (column.size() >= 3) verticalMatches.push_back(column);
+				});
+			th[i].join();
+		}
+		/*cout << "vertical: " << endl;
+		for (int i = 0; i < verticalCombs.size(); i++) {
+			for (int j = 0; j < verticalMatches.at(i).size(); j++) {
+				cout << verticalMatches.at(i).at(j).get_color() << ' ';
+			}
+			cout << endl;
+			cout << verticalCombs.at(i) << endl;
+		}*/
+
+		th = new thread[height];
+		vector<vector<Button>> horizontalMatches;
+		for (int i = 0; i < height; i++)
+		{
+			th[i] = thread([&] {
+				vector<Button> row;
+			row.push_back(button[i][0]);
+			for (int j = 1; j < width; j++)
+			{
+				if (button[i][j].get_color() != row[0].get_color()) {
+					if (row.size() >= 3) horizontalMatches.push_back(row);
+					row.clear();
+				}
+				row.push_back(button[i][j]);
+			}
+			if (row.size() >= 3) horizontalMatches.push_back(row);
+				});
+			th[i].join();
+		}
+		/*cout << "\nhorizontal:" << endl;
+		for (int i = 0; i < horizontalCombs.size(); i++) {
+			for (int j = 0; j < horizontalMatches.at(i).size(); j++) {
+				cout << horizontalMatches.at(i).at(j).get_color() << ' ';
+			}
+			cout << endl;
+			cout << horizontalCombs.at(i) << endl;
+		}*/
+
+		if (horizontalMatches.size() == 0 && verticalMatches.size() == 0) return 0;//there`s no combinations on the field
+
+		vector<vector<Button>> specialMatches;
+		if (horizontalMatches.size() == 0 || verticalMatches.size() == 0) goto empty;
+		for (int i = 0; i < horizontalMatches.size(); i++)
+		{
+			for (int j = 0; j < horizontalMatches.at(i).size(); j++)
+			{
+				for (int i1 = 0; i1 < verticalMatches.size(); i1++)
+				{
+					for (int j1 = 0; j1 < verticalMatches.at(i1).size(); j1++)
+					{
+						if (horizontalMatches.at(i).at(j).get_id() == verticalMatches.at(i1).at(j1).get_id()) {//if 2 combs share the same button
+							specialMatches.push_back(horizontalMatches.at(i));
+							for (int k = 0; k < verticalMatches.at(i1).size(); k++)
+							{
+								specialMatches.back().push_back(verticalMatches.at(i1).at(k));
+							}
+							horizontalMatches.erase(horizontalMatches.begin() + i);
+							verticalMatches.erase(verticalMatches.begin() + i1);
+							if (horizontalMatches.size() == 0 || verticalMatches.size() == 0) goto empty;
+						}
+					}
+				}
+			}
+		}
+	empty:
+
+		/*cout << "vertical: " << endl;
+		for (int i = 0; i < verticalCombs.size(); i++) {
+			for (int j = 0; j < verticalMatches.at(i).size(); j++) {
+				cout << verticalMatches.at(i).at(j).get_color() << ' ';
+			}
+			cout << endl;
+			cout << verticalCombs.at(i) << endl;
+		}
+
+		cout << "\nhorizontal:" << endl;
+		for (int i = 0; i < horizontalCombs.size(); i++) {
+			for (int j = 0; j < horizontalMatches.at(i).size(); j++) {
+				cout << horizontalMatches.at(i).at(j).get_color() << ' ';
+			}
+			cout << endl;
+			cout << horizontalCombs.at(i) << endl;
+		}
+
+		cout << "\nspecial:" << endl;
+		for (int i = 0; i < specialCombs.size(); i++) {
+			for (int j = 0; j < specialMatches.at(i).size(); j++) {
+				cout << specialMatches.at(i).at(j).get_color() << ' ';
+			}
+			cout << endl;
+			cout << specialCombs.at(i) << endl;
+		}*/
+		//удаление кнопок
+		future<void> hdelete = async(launch::async, [&] {
+			if (horizontalMatches.size() > 0) {
+				for (int i = 0; i < horizontalMatches.size(); i++)
+				{
+					for (int j = 0; j < horizontalMatches.at(i).size(); j++)
+					{
+
+
+						deleteButton(horizontalMatches.at(i).at(j).get_id());
+					}
+				}
+			}
+			});
+		//hdelete.join();
+
+		future<void> vdelete = async(launch::async, [&] {
+			if (verticalMatches.size() > 0) {
+				for (int i = 0; i < verticalMatches.size(); i++)
+				{
+					for (int j = 0; j < verticalMatches.at(i).size(); j++)
+					{
+						deleteButton(verticalMatches.at(i).at(j).get_id());
+					}
+				}
+			}
+			});
+		//vdelete.join();
+
+		future<void> sdelete = async(launch::async, [&] {
+			if (specialMatches.size() > 0) {
+				for (int i = 0; i < specialMatches.size(); i++)
+				{
+					for (int j = 0; j < specialMatches.at(i).size(); j++)
+					{
+						deleteButton(specialMatches.at(i).at(j).get_id());
+					}
+				}
+			}
+			});
+		//sdelete.join();
+		hdelete.get();
+		vdelete.get();
+		sdelete.get();
+		//thread gap([&] {gapFill(); });
+		//gap.join();
+		gapFill(0);
+		cout << "gapFill ended!" << endl;
+		Clean();
+		//return true;
+		return verticalMatches.size() + horizontalMatches.size() + specialMatches.size() * 2;
+	}
+
+	void gapFill(int delay) {
+		cout << this_thread::get_id() << endl;
+		future<void>* th = new future<void>[width];
+		//vector<vector<Button>> verticalMatches;
+		for (int i = 0; i < width; i++)
+		{
+			this_thread::sleep_for(chrono::milliseconds(50));
+			th[i] = async(launch::async, [&] {
+				int i1 = i;
+			//cout << "thread " << this_thread::get_id() << " started" << endl;
+			srand(time(0) - width + (time_t)i1);
+			bool finish = false;
+			int tempColor;
+			if (button[0][i1].get_color() == 6) button[0][i1].set("color", random(0, 5));
+			while (!finish) {
+				finish = true;
+				for (int j = height - 1; j > 0; j--) {
+					if (finish && button[j][i1].get_color() == 6) finish = false;
+					if (!finish) {//move one tile down
+						button[j][i1].set("color", button[j - 1][i1].get_color());
+						button[j - 1][i1].set("color", 6);//black
+					}
+					//cout << "column " << i1 << " moved" << endl;
+					this_thread::sleep_for(chrono::milliseconds(delay));
+				}
+				if (!finish) button[0][i1].set("color", random(0, 5));
+			}
+				});
+			//cout << "thread " << i << " ended" << endl;
+			//th[i].detach();
+			this_thread::sleep_for(chrono::milliseconds(50));
+		}
+		for (int i = 0; i < width; i++)
+		{
+			th[i].get();
+		}
+
+
+
+
+	}
+
+	void buttonPress(int x, int y)
+	{
+		if (pressed++ == 0)
+		{
+			button[x][y].press("target");
+			press[0] = x;
+			press[1] = y;
+		}
+		else
+		{
+			button[x][y].press("target");
+			button[x][y].swap(button[press[0]][press[1]]);
+			button[x][y].press("untarget");
+			button[press[0]][press[1]].press("untarget");
+			pressed = 0;
+
+			int clean = Clean();
+
+			if (clean == 0)
+			{
+				button[x][y].swap(button[press[0]][press[1]]);
+
+				thread th1(beep, 500, 100); thread th2(beep, 300, 100);
+				th1.detach(); th2.detach();
+			}
+			else
+			{
+				player_point += clean;
+
+				thread th1(beep, 750, 100); thread th2(beep, 800, 100);
+				th1.detach(); th2.detach();
+			}
+
+			system("cls");
+			cout << "----------\nPLAYER POINTS - " << player_point << "\n----------\n";
+		}
+	}
+
+	RectangleShape show(int x, int y) { return button[x][y].show(); }
 };
 
 int main()
 {
-    RenderWindow window(VideoMode(600, 600), "Hello");
-    window.setVerticalSyncEnabled(true);
-    srand(time(0));
+	system("chcp 1251");
+	system("cls");
+	srand(time(0));
 
-    
+	int fieldWidth = 13;
+	int fieldHeight = 6;
 
-    Field field(6, 6);
-    while (window.isOpen())
-    {
-        Vector2i mousePos = Mouse::getPosition(window);
+	int size = std::min((100 / (int)pow(2, fieldWidth / 13) + 2), (100 / (int)pow(2, fieldHeight / 7) + 2));
+	RenderWindow window(VideoMode(fieldWidth * (size + 2) - 2, fieldHeight * (size + 2) - 2), "MatchThree");
 
-        Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == Event::Closed)
-                window.close();
+	Field field(fieldWidth, fieldHeight);
 
-            if (event.type == Event::MouseButtonPressed)
-            {
-                cout << mousePos.x / 100 << mousePos.y / 100;
-                //button[mousePos.y / 100][mousePos.x / 100].press();
-                field.ButtonPress(mousePos.y / 100, mousePos.x / 100);
-            }
-        }
+	while (window.isOpen())
+	{
+		Event event;
+		Vector2i mousePos = Mouse::getPosition(window);
 
-        window.clear();
-        for (int i = 0; i < 6; i++)
-        {
-            for (int j = 0; j < 6; j++)
-            {
-                window.draw(field.getButton(i, j).show());
-            }
-            
-        }
-        window.display();
-    }
+		while (window.pollEvent(event))
+		{
+			if (event.type == Event::Closed) window.close();
 
-    return 0;
+			if (event.type == Event::MouseButtonPressed)
+			{
+				if (mousePos.x % (size + 2) <= 50 && mousePos.y % (size + 2) <= 50) {
+					thread th(beep, 666, 100);
+					th.detach();
+					field.buttonPress(mousePos.y / (size + 2), mousePos.x / (size + 2));
+				}
+			}
+		}
+
+		window.clear();
+
+		for (int i = 0; i < fieldWidth; i++) for (int j = 0; j < fieldHeight; j++)
+			window.draw(field.show(j, i));
+
+		window.display();
+	}
 }
