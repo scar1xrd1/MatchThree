@@ -1,11 +1,19 @@
 ﻿#include <SFML/Graphics.hpp>//254 line
 #include <SFML/Audio.hpp>
 #include <iostream>
+#include <windows.h>
 #include <thread>
 #include <ctime>
 #include <chrono>
+#include <mutex>
+#include <future>
 using namespace std;
 using namespace sf;
+
+void beep(int freq, int m)
+{
+	Beep(freq, m);
+}
 
 class Button
 {
@@ -90,9 +98,12 @@ class Field
 	int pressed; // to move objects selected by the player
 	int press[2];
 
+	int player_point = 0; // for gameplay
+
 public:
 	Field(int width, int height) : width(width), height(height)
 	{
+		//std::mutex mtx;
 		int size = std::min((100 / (int)pow(2, width / 13) + 2), (100 / (int)pow(2, height / 7) + 2));
 		button = new Button * [height];
 		for (int i = 0; i < height; i++) button[i] = new Button[width];
@@ -117,30 +128,8 @@ public:
 		button[1][0].set("color", 0);
 		button[2][0].set("color", 0);
 		button[0][1].set("color", 0);
-		button[0][2].set("color", 0);
-		button[0][3].set("color", 2);
-		button[0][3].swap(button[0][2]);*/
+		button[0][2].set("color", 0);*/
 		Clean();
-
-		/*Button buffer(5000, 5000, 0);
-
-		button[0][0] = Button(0, 0, 5);
-		button[1][0] = Button(102, 0, 2);
-		button[2][0] = Button(204, 0, 5);
-
-
-		ДОДЕЛАТЬ !!!!!!!!!!!!!!!!!! ДОДЕЛАТь
-
-		buffer.set("xy", button[0][0].get_xy("x"), button[0][0].get_xy("y"));
-		buffer.set("color", button[0][0].get_color());
-
-		cout << button[0][0].get_color() << endl;
-
-		button[0][0] = Button(button[1][0].get_xy("x"), button[1][0].get_xy("y"), button[1][0].get_color());
-
-		button[1][0] = Button(buffer.get_xy("x"), buffer.get_xy("y"), buffer.get_color());*/
-
-
 	}
 
 	int random(int a, int b) { return a + rand() % (b - a + 1); }
@@ -150,7 +139,6 @@ public:
 	}
 
 	int Clean() {
-		int combinations = 0;
 
 		thread* th = new thread[width];
 		vector<vector<Button>> verticalMatches;
@@ -264,7 +252,7 @@ public:
 			cout << specialCombs.at(i) << endl;
 		}*/
 		//удаление кнопок
-		thread hdelete([&] {
+		future<void> hdelete = async(launch::async, [&] {
 			if (horizontalMatches.size() > 0) {
 				for (int i = 0; i < horizontalMatches.size(); i++)
 				{
@@ -277,9 +265,9 @@ public:
 				}
 			}
 			});
-		hdelete.join();
+		//hdelete.join();
 
-		thread vdelete([&] {
+		future<void> vdelete = async(launch::async, [&] {
 			if (verticalMatches.size() > 0) {
 				for (int i = 0; i < verticalMatches.size(); i++)
 				{
@@ -290,9 +278,9 @@ public:
 				}
 			}
 			});
-		vdelete.join();
+		//vdelete.join();
 
-		thread sdelete([&] {
+		future<void> sdelete = async(launch::async, [&] {
 			if (specialMatches.size() > 0) {
 				for (int i = 0; i < specialMatches.size(); i++)
 				{
@@ -303,27 +291,29 @@ public:
 				}
 			}
 			});
-		sdelete.join();
-
+		//sdelete.join();
+		hdelete.get();
+		vdelete.get();
+		sdelete.get();
 		//thread gap([&] {gapFill(); });
 		//gap.join();
-		gapFill();
+		gapFill(0);
 		cout << "gapFill ended!" << endl;
 		Clean();
 		//return true;
-		return verticalMatches.size() + horizontalMatches.size() + specialMatches.size();
+		return verticalMatches.size() + horizontalMatches.size() + specialMatches.size() * 2;
 	}
 
-	void gapFill() {
-
-		thread* th = new thread[width];
+	void gapFill(int delay) {
+		cout << this_thread::get_id() << endl;
+		future<void>* th = new future<void>[width];
 		//vector<vector<Button>> verticalMatches;
 		for (int i = 0; i < width; i++)
 		{
 			this_thread::sleep_for(chrono::milliseconds(50));
-			th[i] = thread([&] {
+			th[i] = async(launch::async, [&] {
 				int i1 = i;
-			cout << "thread " << i1 << " started" << endl;
+			//cout << "thread " << this_thread::get_id() << " started" << endl;
 			srand(time(0) - width + (time_t)i1);
 			bool finish = false;
 			int tempColor;
@@ -336,16 +326,21 @@ public:
 						button[j][i1].set("color", button[j - 1][i1].get_color());
 						button[j - 1][i1].set("color", 6);//black
 					}
-					cout << "column " << i1 << " moved" << endl;
-					this_thread::sleep_for(chrono::milliseconds(250)); 
+					//cout << "column " << i1 << " moved" << endl;
+					this_thread::sleep_for(chrono::milliseconds(delay));
 				}
 				if (!finish) button[0][i1].set("color", random(0, 5));
 			}
 				});
-			cout << "thread " << i << " ended" << endl;
-			th[i].detach();
+			//cout << "thread " << i << " ended" << endl;
+			//th[i].detach();
 			this_thread::sleep_for(chrono::milliseconds(50));
 		}
+		for (int i = 0; i < width; i++)
+		{
+			th[i].get();
+		}
+
 
 
 
@@ -367,10 +362,25 @@ public:
 			button[press[0]][press[1]].press("untarget");
 			pressed = 0;
 
-			cout << "-----\nSTART CLEAN\n-----\n";
-			cout << "-----\nRESULT CLEAN - " << Clean() << "\n------\n";
-			cout << "-----\nEND CLEAN\n-----\n";
-			Clean();
+			int clean = Clean();
+
+			if (clean == 0)
+			{
+				button[x][y].swap(button[press[0]][press[1]]);
+
+				thread th1(beep, 500, 100); thread th2(beep, 300, 100);
+				th1.detach(); th2.detach();
+			}
+			else
+			{
+				player_point += clean;
+
+				thread th1(beep, 750, 100); thread th2(beep, 800, 100);
+				th1.detach(); th2.detach();
+			}
+
+			system("cls");
+			cout << "----------\nPLAYER POINTS - " << player_point << "\n----------\n";
 		}
 	}
 
@@ -386,7 +396,7 @@ int main()
 	int fieldWidth = 13;
 	int fieldHeight = 6;
 
-	int size = min((100 / (int)pow(2, fieldWidth / 13) + 2), (100 / (int)pow(2, fieldHeight / 7) + 2));
+	int size = std::min((100 / (int)pow(2, fieldWidth / 13) + 2), (100 / (int)pow(2, fieldHeight / 7) + 2));
 	RenderWindow window(VideoMode(fieldWidth * (size + 2) - 2, fieldHeight * (size + 2) - 2), "MatchThree");
 
 	Field field(fieldWidth, fieldHeight);
@@ -402,8 +412,11 @@ int main()
 
 			if (event.type == Event::MouseButtonPressed)
 			{
-				if (mousePos.x % (size + 2) <= 50 && mousePos.y % (size + 2) <= 50)
+				if (mousePos.x % (size + 2) <= 50 && mousePos.y % (size + 2) <= 50) {
+					thread th(beep, 666, 100);
+					th.detach();
 					field.buttonPress(mousePos.y / (size + 2), mousePos.x / (size + 2));
+				}
 			}
 		}
 
