@@ -15,15 +15,15 @@ class Button
 	int current_color;
 	int id;// for combinations checking
 	//int iColor[6][3] = { {255,0,0}, {95,0,0}, {250,128,114}, {178,34,34}, {205,92,92}, {220,20,60} };
-	int iColor[6][3]{ {101, 83, 172}, {188, 76, 67}, {67, 188, 76}, {193, 61, 194}, {194, 193, 61}, {61, 194, 193} };
+	int iColor[7][3]{ {101, 83, 172}, {188, 76, 67}, {67, 188, 76}, {193, 61, 194}, {194, 193, 61}, {61, 194, 193}, {0, 0, 0} };
 	RectangleShape btn;
 
 public:
 	Button() { btn.setSize(Vector2f(100, 100)); }
 
-	Button(int x, int y, int color, int id) : current_color(color), x(x), y(y)
+	Button(int x, int y, int color, int id, int size) : current_color(color), x(x), y(y), id(id)
 	{
-		btn.setSize(Vector2f(100, 100));
+		btn.setSize(Vector2f(size, size));
 		btn.setFillColor(Color(iColor[color][0], iColor[color][1], iColor[color][2]));
 		btn.setPosition(x, y);
 	}
@@ -66,29 +66,33 @@ public:
 
 class Field
 {
-	Button button[6][6];
+	Button** button;
+	//Button button[6][6];
 	int x, y;
 	int width, height;
 public:
 	Field(int width, int height) : width(width), height(height)
 	{
-		
-		thread *th = new thread[width];//threads array
+		int size = std::min((100 / (int)pow(2, width / 13) + 2), (100 / (int)pow(2, height / 7) + 2));
+		button = new Button * [height];
+		for (int i = 0; i < height; i++) button[i] = new Button[width];
 
+		thread *th = new thread[width];//threads array
 		for (int i = 0; i < width; i++)
 		{			
 			th[i] = thread([=] { 
 				srand(time(0) - width + (time_t)i);//this allows to asynchronise random even when a second passes while creating threads
-				int x = 102 * i;
+				int x = (size + 2) * i;
 				y = 0;
 				for (int j = 0; j < height; j++)
 				{
-					button[j][i] = Button(x, y, 0 + rand() % (5 + 0 + 1), i * width + j);//[j][i] generates by columns
-					y += 102;
+					button[j][i] = Button(x, y, 0 + rand() % (5 + 0 + 1), j * width + i, size);//[j][i] generates by columns
+					y += (size + 2);
 				}
 			});//creating threads for each column generation
 			th[i].join();
 		}
+		//for a test
 		button[0][0].set("color", 0);
 		button[1][0].set("color", 0);
 		button[2][0].set("color", 0);
@@ -117,88 +121,73 @@ public:
 		
 	}
 
-	bool Clean() {
-		bool clean = true;
+	void deleteButton(int id) {
+		button[id / width][id % width].set("color", 6);
+	}
+
+	void Clean() {
+		
 		thread* th = new thread[width];
 		vector<vector<Button>> verticalMatches;
-		vector<int> verticalCombs;// how many tiles in a vertical row
 		for (int i = 0; i < width; i++)
 		{
 			th[i] = thread([&] {
-				//vector<int> verticalCombs;// how many tiles in a row
+
 				vector<Button> column;
 				column.push_back(button[0][i]);
 				for (int j = 1; j < height; j++)
 				{
 					if (button[j][i].get_color() != column[0].get_color()) {
-						if (column.size() >= 3) {
-							verticalCombs.push_back(column.size());
-							verticalMatches.push_back(column);
-							
-						}
+						if (column.size() >= 3) verticalMatches.push_back(column);
 						column.clear();
-						
 					}
 					column.push_back(button[j][i]);
 				}
-				if (column.size() >= 3) {
-					verticalCombs.push_back(column.size());
-					verticalMatches.push_back(column);
-
-				}
+				if (column.size() >= 3) verticalMatches.push_back(column);
 			});
 			th[i].join();
 		}
-		cout << "vertical: " << endl;
+		/*cout << "vertical: " << endl;
 		for (int i = 0; i < verticalCombs.size(); i++) {
 			for (int j = 0; j < verticalMatches.at(i).size(); j++) {
 				cout << verticalMatches.at(i).at(j).get_color() << ' ';
 			}
 			cout << endl;
 			cout << verticalCombs.at(i) << endl;
-		}
+		}*/
 
 		th = new thread[height];
 		vector<vector<Button>> horizontalMatches;
-		vector<int> horizontalCombs;// how many tiles in a horizontal row
 		for (int i = 0; i < height; i++)
 		{
 			th[i] = thread([&] {
-				//vector<int> verticalCombs;// how many tiles in a row
 				vector<Button> row;
 				row.push_back(button[i][0]);
 				for (int j = 1; j < width; j++)
 				{
 					if (button[i][j].get_color() != row[0].get_color()) {
-						if (row.size() >= 3) {
-							horizontalCombs.push_back(row.size());
-							horizontalMatches.push_back(row);
-						}
+						if (row.size() >= 3) horizontalMatches.push_back(row);
 						row.clear();
 					}
 					row.push_back(button[i][j]);
 				}
-				if (row.size() >= 3) {
-					horizontalCombs.push_back(row.size());
-					horizontalMatches.push_back(row);
-
-				}
+				if (row.size() >= 3) horizontalMatches.push_back(row);
 				});
 			th[i].join();
 		}
-		cout << "\nhorizontal:" << endl;
+		/*cout << "\nhorizontal:" << endl;
 		for (int i = 0; i < horizontalCombs.size(); i++) {
 			for (int j = 0; j < horizontalMatches.at(i).size(); j++) {
 				cout << horizontalMatches.at(i).at(j).get_color() << ' ';
 			}
 			cout << endl;
 			cout << horizontalCombs.at(i) << endl;
-		}
-		if (horizontalCombs.size() == 0 && verticalCombs.size() == 0) return false;
+		}*/
+		
+		if (horizontalMatches.size() == 0 && verticalMatches.size() == 0) return;//there`s no combinations on the field
 		
 		vector<vector<Button>> specialMatches;
-		vector<int> specialCombs;// how many tiles in a special row(special is the one which has both vertical and horizontal row
-		if (horizontalCombs.size() == 0 || verticalCombs.size() == 0) goto empty;
+		if (horizontalMatches.size() == 0 || verticalMatches.size() == 0) goto empty;
 		for (int i = 0; i < horizontalMatches.size(); i++)
 		{
 			for (int j = 0; j < horizontalMatches.at(i).size(); j++)
@@ -213,12 +202,9 @@ public:
 							{
 								specialMatches.back().push_back(verticalMatches.at(i1).at(k));
 							}
-							specialCombs.push_back(horizontalCombs.at(i) + verticalCombs.at(i1) - 1);//special combination size
 							horizontalMatches.erase(horizontalMatches.begin() + i);
-							horizontalCombs.erase(horizontalCombs.begin() + i);
 							verticalMatches.erase(verticalMatches.begin() + i1);
-							verticalCombs.erase(verticalCombs.begin() + i1);
-							if (horizontalCombs.size() == 0 || verticalCombs.size() == 0) goto empty;
+							if (horizontalMatches.size() == 0 || verticalMatches.size() == 0) goto empty;
 						}
 					}
 				}
@@ -242,7 +228,7 @@ public:
 			}
 			cout << endl;
 			cout << horizontalCombs.at(i) << endl;
-		}*/
+		}
 
 		cout << "\nspecial:" << endl;
 		for (int i = 0; i < specialCombs.size(); i++) {
@@ -251,7 +237,92 @@ public:
 			}
 			cout << endl;
 			cout << specialCombs.at(i) << endl;
-		}//удаление кнопок
+		}*/
+		//удаление кнопок
+		thread hdelete([&] {
+			if (horizontalMatches.size() > 0) {
+				for (int i = 0; i < horizontalMatches.size(); i++)
+				{
+					for (int j = 0; j < horizontalMatches.at(i).size(); j++)
+					{
+
+
+						deleteButton(horizontalMatches.at(i).at(j).get_id());
+					}
+				}
+			}
+		});
+		hdelete.join();
+
+		thread vdelete([&] {
+			if (verticalMatches.size() > 0) {
+				for (int i = 0; i < verticalMatches.size(); i++)
+				{
+					for (int j = 0; j < verticalMatches.at(i).size(); j++)
+					{
+						deleteButton(verticalMatches.at(i).at(j).get_id());
+					}
+				}
+			}
+			});
+		vdelete.join();
+
+		thread sdelete([&] {
+			if (specialMatches.size() > 0) {
+				for (int i = 0; i < specialMatches.size(); i++)
+				{
+					for (int j = 0; j < specialMatches.at(i).size(); j++)
+					{
+						deleteButton(specialMatches.at(i).at(j).get_id());
+					}
+				}
+			}
+			});
+		sdelete.join();
+
+		//thread gap([&] {gapFill(); });
+		//gap.join();
+		gapFill();
+		cout << "gapFill ended!" << endl;
+		Clean();
+		//return true;
+	}
+
+	void gapFill() {
+		
+		thread* th = new thread[width];
+		//vector<vector<Button>> verticalMatches;
+		for (int i = 0; i < width; i++)
+		{
+			this_thread::sleep_for(chrono::milliseconds(50));
+			th[i] = thread([&] {
+				int i1 = i;
+				cout << "thread " << i1 << " started" << endl;
+				srand(time(0) - width + (time_t)i1);
+				bool finish = false;
+				int tempColor;
+				if (button[0][i1].get_color() == 6) button[0][i1].set("color", 0 + rand() % (5 + 0 + 1));
+				while (!finish) {
+					finish = true;
+					for (int j = height - 1; j > 0; j--) {
+						if (finish && button[j][i1].get_color() == 6) finish = false;
+						if (!finish) {//move one tile down
+							button[j][i1].set("color", button[j - 1][i1].get_color());
+							button[j - 1][i1].set("color", 6);//black
+						}
+						cout << "column " << i1 << " moved" << endl;
+						this_thread::sleep_for(chrono::milliseconds(250));
+					}
+					if (!finish) button[0][i1].set("color", 0 + rand() % (5 + 0 + 1));
+				}
+				});
+			cout << "thread " << i << " ended" << endl;
+			th[i].detach();
+			this_thread::sleep_for(chrono::milliseconds(50));
+		}
+
+			
+		
 	}
 
 	RectangleShape show(int x, int y) { return button[x][y].show(); }
@@ -262,9 +333,12 @@ int main()
 	system("chcp 1251");
 	system("cls");
 	srand(time(0));
-	RenderWindow window(VideoMode(610, 610), "MatchThree");
+	int fieldWidth = 13;
+	int fieldHeight = 6;
+	int size = std::min((100 / (int)pow(2, fieldWidth / 13) + 2), (100 / (int)pow(2, fieldHeight / 7) + 2));
+	RenderWindow window(VideoMode(fieldWidth * (size + 2) - 2, fieldHeight * (size + 2) - 2), "MatchThree");
 
-	Field field(6, 6);
+	Field field(fieldWidth, fieldHeight);
 
 	while (window.isOpen())
 	{
@@ -276,8 +350,8 @@ int main()
 
 		window.clear();
 
-		for (int i = 0; i < 6; i++) for (int j = 0; j < 6; j++)
-			window.draw(field.show(i, j));
+		for (int i = 0; i < fieldWidth; i++) for (int j = 0; j < fieldHeight; j++)
+			window.draw(field.show(j, i));
 
 		window.display();
 	}	
