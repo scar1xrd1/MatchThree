@@ -4,6 +4,8 @@
 #include <thread>
 #include <ctime>
 #include <chrono>
+#include <mutex>
+#include <future>
 using namespace std;
 using namespace sf;
 
@@ -73,6 +75,7 @@ class Field
 public:
 	Field(int width, int height) : width(width), height(height)
 	{
+		//std::mutex mtx;
 		int size = std::min((100 / (int)pow(2, width / 13) + 2), (100 / (int)pow(2, height / 7) + 2));
 		button = new Button * [height];
 		for (int i = 0; i < height; i++) button[i] = new Button[width];
@@ -239,7 +242,7 @@ public:
 			cout << specialCombs.at(i) << endl;
 		}*/
 		//удаление кнопок
-		thread hdelete([&] {
+		future<void> hdelete = async(launch::async, [&] {
 			if (horizontalMatches.size() > 0) {
 				for (int i = 0; i < horizontalMatches.size(); i++)
 				{
@@ -252,9 +255,9 @@ public:
 				}
 			}
 		});
-		hdelete.join();
+		//hdelete.join();
 
-		thread vdelete([&] {
+		future<void> vdelete = async(launch::async, [&] {
 			if (verticalMatches.size() > 0) {
 				for (int i = 0; i < verticalMatches.size(); i++)
 				{
@@ -265,9 +268,9 @@ public:
 				}
 			}
 			});
-		vdelete.join();
+		//vdelete.join();
 
-		thread sdelete([&] {
+		future<void> sdelete = async(launch::async, [&] {
 			if (specialMatches.size() > 0) {
 				for (int i = 0; i < specialMatches.size(); i++)
 				{
@@ -278,26 +281,28 @@ public:
 				}
 			}
 			});
-		sdelete.join();
-
+		//sdelete.join();
+		hdelete.get();
+		vdelete.get();
+		sdelete.get();
 		//thread gap([&] {gapFill(); });
 		//gap.join();
-		gapFill();
+		gapFill(0);
 		cout << "gapFill ended!" << endl;
 		Clean();
 		//return true;
 	}
 
-	void gapFill() {
-		
-		thread* th = new thread[width];
+	void gapFill(int delay) {
+		cout << this_thread::get_id() << endl;
+		future<void>* th = new future<void>[width];
 		//vector<vector<Button>> verticalMatches;
 		for (int i = 0; i < width; i++)
 		{
 			this_thread::sleep_for(chrono::milliseconds(50));
-			th[i] = thread([&] {
+			th[i] = async(launch::async, [&] {
 				int i1 = i;
-				cout << "thread " << i1 << " started" << endl;
+				//cout << "thread " << this_thread::get_id() << " started" << endl;
 				srand(time(0) - width + (time_t)i1);
 				bool finish = false;
 				int tempColor;
@@ -310,16 +315,21 @@ public:
 							button[j][i1].set("color", button[j - 1][i1].get_color());
 							button[j - 1][i1].set("color", 6);//black
 						}
-						cout << "column " << i1 << " moved" << endl;
-						this_thread::sleep_for(chrono::milliseconds(250));
+						//cout << "column " << i1 << " moved" << endl;
+						this_thread::sleep_for(chrono::milliseconds(delay));
 					}
 					if (!finish) button[0][i1].set("color", 0 + rand() % (5 + 0 + 1));
 				}
 				});
-			cout << "thread " << i << " ended" << endl;
-			th[i].detach();
+			//cout << "thread " << i << " ended" << endl;
+			//th[i].detach();
 			this_thread::sleep_for(chrono::milliseconds(50));
 		}
+		for (int i = 0; i < width; i++)
+		{
+			th[i].get();
+		}
+		
 
 			
 		
