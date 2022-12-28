@@ -149,7 +149,8 @@ public:
 		button[id / width][id % width].set("color", 6);
 	}
 
-	void Clean() {
+	int Clean() {
+		int combinations = 0;
 
 		thread* th = new thread[width];
 		vector<vector<Button>> verticalMatches;
@@ -208,7 +209,7 @@ public:
 			cout << horizontalCombs.at(i) << endl;
 		}*/
 
-		if (horizontalMatches.size() == 0 && verticalMatches.size() == 0) return;//there`s no combinations on the field
+		if (horizontalMatches.size() == 0 && verticalMatches.size() == 0) return 0;//there`s no combinations on the field
 
 		vector<vector<Button>> specialMatches;
 		if (horizontalMatches.size() == 0 || verticalMatches.size() == 0) goto empty;
@@ -310,6 +311,7 @@ public:
 		cout << "gapFill ended!" << endl;
 		Clean();
 		//return true;
+		return verticalMatches.size() + horizontalMatches.size() + specialMatches.size();
 	}
 
 	void gapFill() {
@@ -335,7 +337,7 @@ public:
 						button[j - 1][i1].set("color", 6);//black
 					}
 					cout << "column " << i1 << " moved" << endl;
-					this_thread::sleep_for(chrono::milliseconds(250));
+					this_thread::sleep_for(chrono::milliseconds(250)); 
 				}
 				if (!finish) button[0][i1].set("color", random(0, 5));
 			}
@@ -364,6 +366,10 @@ public:
 			button[x][y].press("untarget");
 			button[press[0]][press[1]].press("untarget");
 			pressed = 0;
+
+			cout << "-----\nSTART CLEAN\n-----\n";
+			cout << "-----\nRESULT CLEAN - " << Clean() << "\n------\n";
+			cout << "-----\nEND CLEAN\n-----\n";
 			Clean();
 		}
 	}
@@ -396,8 +402,8 @@ int main()
 
 			if (event.type == Event::MouseButtonPressed)
 			{
-				//cout << mousePos.y / 100 << " " << mousePos.x / 100 << endl;
-				field.buttonPress(mousePos.y / 50, mousePos.x / 50);
+				if (mousePos.x % (size + 2) <= 50 && mousePos.y % (size + 2) <= 50)
+					field.buttonPress(mousePos.y / (size + 2), mousePos.x / (size + 2));
 			}
 		}
 
