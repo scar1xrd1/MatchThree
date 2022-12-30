@@ -16,6 +16,10 @@ void Button::swap(Button& other)
 	other.set("color", a);
 }
 
+void Button::changeState(int state) {
+
+}
+
 void Button::set(string data, int value1)
 {
 	if (data == "color")

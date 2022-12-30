@@ -13,6 +13,7 @@ using namespace sf;
 
 class Button
 {
+	int state;// determines whether it`s a simple tile or some type of a bonus
 	string sColor;
 	int current_color;
 	int iColor[7][3]{ {101, 83, 172}, {188, 76, 67}, {67, 188, 76}, {193, 61, 194}, {194, 193, 61}, {61, 194, 193}, {0, 0, 0} };
@@ -37,6 +38,7 @@ public:
 
 	void swap(Button& other);
 	void press(string value);
+	void changeState(int state);
 
 	RectangleShape show() { return btn; }
 };
