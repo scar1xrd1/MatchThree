@@ -14,20 +14,21 @@ int main()
 	system("cls");
 	srand(time(0));
 
+	bool stop = false;
 	int fieldWidth = 13;
 	int fieldHeight = 6;
 
 	int size = std::min((100 / (int)pow(2, fieldWidth / 13) + 2), (100 / (int)pow(2, fieldHeight / 7) + 2));
 	RenderWindow window(VideoMode(fieldWidth * (size + 2) - 2, fieldHeight * (size + 2) - 2), "MatchThree");
 
-	Field field(fieldWidth, fieldHeight);
+	Field field(fieldWidth, fieldHeight, 5, 10);
 
-	while (window.isOpen())
+	while (window.isOpen() || stop)
 	{
 		Event event;
 		Vector2i mousePos = Mouse::getPosition(window);
 
-		while (window.pollEvent(event))
+		while (window.pollEvent(event) || stop)
 		{
 			if (event.type == Event::Closed) window.close();
 
@@ -36,7 +37,7 @@ int main()
 				if (mousePos.x % (size + 2) <= 50 && mousePos.y % (size + 2) <= 50) {
 					thread th(beep, 666, 100);
 					th.detach();
-					field.buttonPress(mousePos.y / (size + 2), mousePos.x / (size + 2));
+					if (field.buttonPress(mousePos.y / (size + 2), mousePos.x / (size + 2)) == 1) window.close();
 				}
 			}
 		}

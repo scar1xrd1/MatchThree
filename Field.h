@@ -13,12 +13,13 @@ class Field
 	int width, height;
 
 	int pressed; // to move objects selected by the player
-	int press[2];
+	int press[2];	
 
 	int player_point = 0; // for gameplay
+	int moves, score;
 
 public:
-	Field(int width, int height);
+	Field(int width, int height, int move, int score);
 
 	void beep(int freq, int m) { Beep(freq, m); }
 	int random(int a, int b) { return a + rand() % (b - a + 1); }
@@ -28,7 +29,7 @@ public:
 	int Clean();
 	void gapFill();
 
-	void buttonPress(int x, int y);
+	int buttonPress(int x, int y);
 
 	RectangleShape show(int x, int y) { return button[x][y].show(); }
 };

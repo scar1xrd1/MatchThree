@@ -12,7 +12,7 @@
 using namespace std;
 using namespace sf;
 
-Field::Field(int width, int height) : width(width), height(height)
+Field::Field(int width, int height, int move, int score) : width(width), height(height), moves(move), score(score)
 {
 	int size = std::min((100 / (int)pow(2, width / 13) + 2), (100 / (int)pow(2, height / 7) + 2));
 	button = new Button * [height];
@@ -137,7 +137,13 @@ empty:
 	gapFill(); //cout << "gapFill ended!" << endl;
 	Clean();
 
-	return verticalMatches.size() + horizontalMatches.size() + specialMatches.size() * 2;
+	int point = 0;
+
+	for (int i = 0; i < verticalMatches.size(); i++) point += verticalMatches.at(i).size();
+	for (int i = 0; i < horizontalMatches.size(); i++) point += horizontalMatches.at(i).size();
+	for (int i = 0; i < specialMatches.size(); i++) point += specialMatches.at(i).size()*2;
+
+	return point;
 }
 
 void Field::gapFill() 
@@ -146,7 +152,7 @@ void Field::gapFill()
 
 	for (int i = 0; i < width; i++)
 	{
-		sleep("ms", 1);
+		//sleep("ms", 1);
 		th[i] = async(launch::async, [&] {
 			int i1 = i;
 		srand(time(0) - width + (time_t)i1);
@@ -171,7 +177,7 @@ void Field::gapFill()
 	for (int i = 0; i < width; i++) th[i].get();
 }
 
-void Field::buttonPress(int x, int y)
+int Field::buttonPress(int x, int y)
 {
 	int clean = 0;
 
@@ -206,9 +212,33 @@ void Field::buttonPress(int x, int y)
 			player_point += clean;
 			thread th1(&Field::beep, this, 750, 100); thread th2(&Field::beep, this, 800, 100);
 			th1.detach(); th2.detach();
+			moves--;
+
+			
 		}
 
 		system("cls");
-		cout << "PLAYER POINT\t" << player_point << "\n";
+		cout << "CLEAN\t" << clean << endl;
+		cout << "PLAYER POINT\t" << player_point << "\tNEED\t" << score << "\n";
+		cout << "MOVES\t" << moves << "\n";
+
+		if (player_point >= score) {
+			cout << "123\n";
+			cout << "YOU WIN!\n";
+			beep(500, 250);
+			beep(750, 250);
+			beep(1000, 1000);
+			return 1;
+		}
+
+		else if (moves == 0) {
+			cout << "YOU LOSE!\n";
+			beep(1000, 250);
+			beep(750, 250);
+			beep(500, 1000);
+			return 1;
+		}		
 	}
+
+	return 0;
 }
