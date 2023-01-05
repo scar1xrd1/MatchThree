@@ -32,4 +32,7 @@ public:
 	int buttonPress(int x, int y);
 
 	RectangleShape show(int x, int y) { return button[x][y].show(); }
+
+	string getScore() { return to_string(player_point); }
+	string getRightAmount() { return to_string(score); }
 };

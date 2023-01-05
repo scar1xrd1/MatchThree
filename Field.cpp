@@ -181,6 +181,18 @@ int Field::buttonPress(int x, int y)
 {
 	int clean = 0;
 
+	if (y >= width || x >= height || y < 0 || x < 0)
+	{
+		thread th(&Field::beep, this, 450, 100);
+		th.detach();
+		return -1;
+	}
+	else
+	{
+		thread th(&Field::beep, this, 666, 100);
+		th.detach();
+	}
+
 	if (pressed++ == 0) // click first button
 	{
 		button[x][y].press("target");
@@ -212,9 +224,7 @@ int Field::buttonPress(int x, int y)
 			player_point += clean;
 			thread th1(&Field::beep, this, 750, 100); thread th2(&Field::beep, this, 800, 100);
 			th1.detach(); th2.detach();
-			moves--;
-
-			
+			moves--;			
 		}
 
 		system("cls");
