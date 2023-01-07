@@ -24,7 +24,7 @@ int main()
 	int size = std::min((100 / (int)pow(2, fieldWidth / 13) + 2), (100 / (int)pow(2, fieldHeight / 7) + 2));
 	RenderWindow window(VideoMode(fieldWidth * (size + 2) - 2, fieldHeight * (size + 12) - 2), "MatchThree");
 
-	Field field(fieldWidth, fieldHeight, 5, 10);
+	Field field(fieldWidth, fieldHeight, 10, 25);
 
 	string score, rightAmount, move;
 
@@ -71,6 +71,15 @@ int main()
 
 		if(win) 
 		{
+			window.clear();
+			text1.set("YOU WIN");
+			text2.set("YOU WIN");
+			moves.set("YOU WIN");
+			window.draw(text1.show());
+			window.draw(text2.show());
+			window.draw(moves.show());
+			window.display();
+
 			beep(500, 250);
 			beep(750, 250);
 			beep(1000, 1000);
@@ -79,6 +88,15 @@ int main()
 		}
 		else if (lose)
 		{
+			window.clear();
+			text1.set("YOU LOSE");
+			text2.set("YOU LOSE");
+			moves.set("YOU LOSE");
+			window.draw(text1.show());
+			window.draw(text2.show());
+			window.draw(moves.show());
+			window.display();
+
 			beep(1000, 250);
 			beep(750, 250);
 			beep(500, 1000);
