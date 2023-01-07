@@ -2,6 +2,7 @@
 #include <SFML/Audio.hpp>
 #include "Button.h"
 #include "Field.h"
+#include "Text.h"
 #include <iostream>
 using namespace std;
 using namespace sf;
@@ -14,7 +15,9 @@ int main()
 	system("cls");
 	srand(time(0));
 
-	bool stop = false;
+	int state = 0;
+	bool win, lose, stop;
+	stop = win = lose = false;
 	int fieldWidth = 13;
 	int fieldHeight = 6;
 
@@ -23,33 +26,16 @@ int main()
 
 	Field field(fieldWidth, fieldHeight, 5, 10);
 
-	Font font;
-	Text text1;
-	Text text2;
+	string score, rightAmount, move;
 
-	string score, rightAmount;
-
-	text1.setFont(font);
-	text1.setPosition(5, 325);
-	text1.setFillColor(Color::White);
-	text1.setCharacterSize(34);
-	
-	text2.setFont(font);
-	text2.setPosition(325, 325);
-	text2.setFillColor(Color::White);
-	text2.setCharacterSize(34);
-
-	if (!font.loadFromFile("fonts/LucidaTypewriterBold.ttf"))
-	{
-		cout << "Error load font\n";
-	}
+	Texts text1(5, 320, 0, 24);
+	Texts text2(5, 350, 0, 24);
+	Texts moves(200, 325, 0, 34);
 
 	while (window.isOpen() || stop)
 	{
 		Event event;
 		Vector2i mousePos = Mouse::getPosition(window);
-		score = field.getScore();
-		rightAmount = field.getRightAmount();
 
 		while (window.pollEvent(event) || stop)
 		{
@@ -58,21 +44,46 @@ int main()
 			if (event.type == Event::MouseButtonPressed)
 			{
 				if (mousePos.x % (size + 2) <= 50 && mousePos.y % (size + 2) <= 50) {					
-					if (field.buttonPress(mousePos.y / (size + 2), mousePos.x / (size + 2)) == 1) window.close();
+					state = field.buttonPress(mousePos.y / (size + 2), mousePos.x / (size + 2));
+					if (state == 1) win = true;
+					else if (state == 2) lose = true;
 				}
 			}
 		}
 		
+		score = field.getScore();
+		rightAmount = field.getRightAmount();
+		move = field.getMove();
+
 		window.clear();
 
 		for (int i = 0; i < fieldWidth; i++) for (int j = 0; j < fieldHeight; j++)
 			window.draw(field.show(j, i)); 
 
-		text1.setString("your score " + score);
-		text2.setString("you need " + rightAmount);
-		window.draw(text1);
-		window.draw(text2);
+		text1.set("your score " + score);
+		text2.set("you need " + rightAmount);
+		moves.set("your moves " + move);
+		window.draw(text1.show());
+		window.draw(text2.show());
+		window.draw(moves.show());
 
 		window.display();
+
+		if(win) 
+		{
+			beep(500, 250);
+			beep(750, 250);
+			beep(1000, 1000);
+			this_thread::sleep_for(chrono::milliseconds(200));
+			window.close();
+		}
+		else if (lose)
+		{
+			beep(1000, 250);
+			beep(750, 250);
+			beep(500, 1000);
+			this_thread::sleep_for(chrono::milliseconds(200));
+			window.close();
+		}
 	}
 }

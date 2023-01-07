@@ -233,20 +233,13 @@ int Field::buttonPress(int x, int y)
 		cout << "MOVES\t" << moves << "\n";
 
 		if (player_point >= score) {
-			cout << "123\n";
 			cout << "YOU WIN!\n";
-			beep(500, 250);
-			beep(750, 250);
-			beep(1000, 1000);
 			return 1;
 		}
 
 		else if (moves == 0) {
 			cout << "YOU LOSE!\n";
-			beep(1000, 250);
-			beep(750, 250);
-			beep(500, 1000);
-			return 1;
+			return 2;
 		}		
 	}
 

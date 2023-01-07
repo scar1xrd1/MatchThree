@@ -1,8 +1,15 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include "Field.h"
 #include "Button.h"
 #include <iostream>
+#include <windows.h>
+#include <thread>
+#include <ctime>
+#include <chrono>
+#include <mutex>
+#include <future>
 using namespace std;
 using namespace sf;
 
@@ -35,4 +42,5 @@ public:
 
 	string getScore() { return to_string(player_point); }
 	string getRightAmount() { return to_string(score); }
+	string getMove() { return to_string(moves); }
 };
