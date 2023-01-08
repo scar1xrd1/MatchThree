@@ -3,17 +3,69 @@
 #include "Button.h"
 #include "Field.h"
 #include "Text.h"
+
+#include "Objects.h"
+#include "NavigationMenu.h"
+#include "LoadMenu.h"
+#include "RefreshMenu.h"
+
 #include <iostream>
 using namespace std;
 using namespace sf;
 
 void beep(int freq, int m) { Beep(freq, m); }
 
+int MainMenu() {
+
+	RenderWindow  window(VideoMode(600, 600), "Match Three");
+
+	ContextSettings settings;
+	settings.antialiasingLevel = 8;
+
+	NavMenu navMenu;
+
+	LoadMenu(window);
+
+	while (window.isOpen()) {
+		Event event;
+
+		while (window.pollEvent(event)) {
+
+			switch (event.type) {
+
+			case Event::Closed:
+				window.close();
+				cout << "Window Closed!" << endl;
+				break;
+
+			case Event::MouseButtonPressed:
+				if (event.mouseButton.button == Mouse::Left) {
+
+					navMenu.navigation(window);
+				}
+			case Event::KeyPressed:
+				if (event.key.code == Keyboard::Key::Escape) {
+					window.clear(Color(77, 58, 90));
+					RefreshMenu(window);
+					window.display();
+
+				}
+
+			default:
+				break;
+			}
+		}
+	}
+	return 0;
+}
+
 int main()
 {
 	system("chcp 1251");
 	system("cls");
 	srand(time(0));
+
+	MainMenu();
 
 	int state = 0;
 	bool win, lose, stop;
