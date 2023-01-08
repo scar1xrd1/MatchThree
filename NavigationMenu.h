@@ -1,12 +1,8 @@
 #include <SFML/Graphics.hpp>
-using namespace sf;
-#include <iostream>
-#include <string> 
-using namespace std;
 #include "Objects.h"
 
-class NavMenu {
-
+class NavMenu
+{
 public:
 	void navigation(RenderWindow& window) {
 
@@ -128,3 +124,4 @@ public:
 		}
 
 	}
+};

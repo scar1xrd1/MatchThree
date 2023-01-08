@@ -10,8 +10,6 @@
 #include "RefreshMenu.h"
 
 #include <iostream>
-using namespace std;
-using namespace sf;
 
 void beep(int freq, int m) { Beep(freq, m); }
 

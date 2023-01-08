@@ -30,8 +30,8 @@
     <ClCompile Include="Text.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="MainMenu.cpp">
-      <Filter>Menu</Filter>
+    <ClCompile Include="..\MatchThreeTest2\MainMenu.cpp">
+      <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -53,10 +53,10 @@
     <ClInclude Include="NavigationMenu.h">
       <Filter>Menu</Filter>
     </ClInclude>
-    <ClInclude Include="LoadMenu.h">
+    <ClInclude Include="RefreshMenu.h">
       <Filter>Menu</Filter>
     </ClInclude>
-    <ClInclude Include="RefreshMenu.h">
+    <ClInclude Include="LoadMenu.h">
       <Filter>Menu</Filter>
     </ClInclude>
   </ItemGroup>

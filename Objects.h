@@ -1,10 +1,10 @@
 #ifndef OBJECTS
 #define OBJECTS
 #include <SFML/Graphics.hpp>
-using namespace sf;
 #include <iostream>
 #include <string> 
 using namespace std;
+using namespace sf;
 
 Font font;
 
