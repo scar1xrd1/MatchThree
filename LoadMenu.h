@@ -11,7 +11,7 @@ void LoadMenu(RenderWindow& window) {
 
 	window.clear(Color(77, 58, 90));
 
-	font.loadFromFile("LucidaTypewriterBold.ttf");
+	font.loadFromFile("fonts/LucidaTypewriterBold.ttf");
 
 	play.setFont(font);
 	play.setString("Play");
@@ -121,5 +121,4 @@ void LoadMenu(RenderWindow& window) {
 	window.display();
 
 #pragma endregion 
-
 }

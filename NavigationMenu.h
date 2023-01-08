@@ -3,7 +3,7 @@ using namespace sf;
 #include <iostream>
 #include <string> 
 using namespace std;
-#include "Objects.h";
+#include "Objects.h"
 
 class NavMenu {
 
@@ -28,24 +28,24 @@ public:
 		Start_Btn.setFillColor(Color(197, 197, 197));
 		Start_Btn.setOutlineColor(Color(240, 239, 243));
 
-		//≈—Ћ» Ќј∆ј“ј  Ќќѕ ј PLAY и она активна
+		//ƒє≈Г√ЛƒМ √Н≈ФƒЖ≈Ф≈З≈Ф ƒШ√Н√ОƒОƒШ≈Ф PLAY ƒН √Ѓ√≠≈Х ≈ХƒЩ≈ИƒН√Ґ√≠≈Х
 		if (Play_Btn.getGlobalBounds().contains(pos.x, pos.y) && Play_Btn.getFillColor() != Color::Transparent) {
 
-			//...“”“  ќƒ «јѕ”— ј »√–џ — ”–ќ¬Ќ≈ћ 1
+			//...≈З√У≈З ƒШ√О√Д √З≈ФƒО√У≈ГƒШ≈Ф ƒМƒВƒР≈∞ ≈Г √УƒР√О√В√НƒєƒЪ 1
 			window.close();
 			cout << "game started";
 		}
 
-		//≈—Ћ» нажата кнопка EXIT и она активна
+		//ƒє≈Г√ЛƒМ √≠≈ХƒЗ≈Х≈И≈Х ƒЩ√≠√ЃƒПƒЩ≈Х EXIT ƒН √Ѓ√≠≈Х ≈ХƒЩ≈ИƒН√Ґ√≠≈Х
 		if (Exit_Btn.getGlobalBounds().contains(pos.x, pos.y) && Exit_Btn.getFillColor() != Color::Transparent) {
 			window.close();
 			cout << "exit";
 		}
 
-		//≈—Ћ» нажата кнопка LEVELS
+		//ƒє≈Г√ЛƒМ √≠≈ХƒЗ≈Х≈И≈Х ƒЩ√≠√ЃƒПƒЩ≈Х LEVELS
 		if (Lvl_Btn.getGlobalBounds().contains(pos.x, pos.y) && Lvl_Btn.getFillColor() != Color::Transparent) {
 
-			//—оздаем прозрачный фон дл€ —“ј–џ’ обьектов
+			//≈Г√Ѓ√І√§≈ХƒЇƒЫ ƒПƒС√Ѓ√ІƒС≈Х√Ј√≠≈±√© √і√Ѓ√≠ √§√ЂЋЩ ≈Г≈З≈ФƒР≈∞≈Р √Ѓ√°√ЉƒЇƒЩ≈И√Ѓ√Ґ
 			Play_Btn.setFillColor(Color::Transparent);
 			Play_Btn.setOutlineColor(Color::Transparent);
 			play.setFillColor(Color::Transparent);
@@ -56,7 +56,7 @@ public:
 			Lvl_Btn.setOutlineColor(Color::Transparent);
 			level_t.setFillColor(Color::Transparent);
 
-			//прорисовка Ќќ¬џ’ обьектов		
+			//ƒПƒС√ЃƒСƒН≈Д√Ѓ√ҐƒЩ≈Х √Н√О√В≈∞≈Р √Ѓ√°√ЉƒЇƒЩ≈И√Ѓ√Ґ		
 			window.clear(Color(77, 58, 90));
 			window.draw(Start_Btn);
 			window.draw(Left_Btn);
@@ -71,7 +71,7 @@ public:
 
 		}
 
-		//  Ќќѕ ј - LEFT
+		// ƒШ√Н√ОƒОƒШ≈Ф - LEFT
 		if (Left_Btn.getGlobalBounds().contains(pos.x, pos.y) && Left_Btn.getFillColor() != Color::Transparent) {
 
 			if ((n - 1) <= 0) {
@@ -98,7 +98,7 @@ public:
 			window.display();
 		}
 
-		// Ќќѕ ј - RIGHT
+		//ƒШ√Н√ОƒОƒШ≈Ф - RIGHT
 		if (Right_Btn.getGlobalBounds().contains(pos.x, pos.y) && Right_Btn.getFillColor() != Color::Transparent) {
 
 			n = n + 1;
@@ -118,10 +118,9 @@ public:
 			window.display();
 		}
 
-		//≈—Ћ» Ќј∆ј“ј  Ќќѕ ј PLAY и она активна
+		//ƒє≈Г√ЛƒМ √Н≈ФƒЖ≈Ф≈З≈Ф ƒШ√Н√ОƒОƒШ≈Ф PLAY ƒН √Ѓ√≠≈Х ≈ХƒЩ≈ИƒН√Ґ√≠≈Х
 		if (Start_Btn.getGlobalBounds().contains(pos.x, pos.y) && Start_Btn.getFillColor() != Color::Transparent) {
-			
-			//...“”“  ќƒ «јѕ”— ј »√–џ — ”–ќ¬Ќ≈ћ n
+			//...≈З√У≈З ƒШ√О√Д √З≈ФƒО√У≈ГƒШ≈Ф ƒМƒВƒР≈∞ ≈Г √УƒР√О√В√НƒєƒЪ n
 			/*void SelectLevel(int n) {
 
 			}*/
@@ -129,4 +128,3 @@ public:
 		}
 
 	}
-};
