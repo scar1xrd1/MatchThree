@@ -121,5 +121,4 @@ void LoadMenu(RenderWindow& window) {
 	window.display();
 
 #pragma endregion 
-
 }

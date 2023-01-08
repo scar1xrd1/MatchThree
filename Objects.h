@@ -24,4 +24,4 @@ int n = 1;
 string lvl_num = to_string(n);
 Vector2i pos;
 
-#endif#pragma once
+#endif

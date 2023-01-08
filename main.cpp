@@ -1,4 +1,4 @@
-﻿#include <SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "Button.h"
 #include "Field.h"
@@ -59,8 +59,7 @@ int MainMenu() {
 	return 0;
 }
 
-int main()
-{
+int main(){
 	system("chcp 1251");
 	system("cls");
 	srand(time(0));
