@@ -9,8 +9,8 @@ using namespace sf;
 
 void beep(int freq, int m) { Beep(freq, m); }
 
-int main()
-{
+int main(){
+
 	system("chcp 1251");
 	system("cls");
 	srand(time(0));
