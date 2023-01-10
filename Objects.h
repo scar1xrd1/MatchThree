@@ -12,6 +12,7 @@ Font font;
 Text play; Text exit_t; Text level_t;
 Text levels; Text num; Text note;
 Text left_t; Text right_t; Text start;
+Text name; Text selecT;
 
 Texts txtT(10, 10, 0, 24);
 

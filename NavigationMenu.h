@@ -46,6 +46,7 @@ public:
 		if (Lvl_Btn.getGlobalBounds().contains(pos.x, pos.y) && Lvl_Btn.getFillColor() != Color::Transparent) {
 			beep(600, 75);
 			//Ńîçäŕĺě ďđîçđŕ÷íűé ôîí äë˙ ŃŇŔĐŰŐ îáüĺęňîâ
+			name.setFillColor(Color::Transparent);
 			Play_Btn.setFillColor(Color::Transparent);
 			Play_Btn.setOutlineColor(Color::Transparent);
 			play.setFillColor(Color::Transparent);
@@ -58,6 +59,8 @@ public:
 
 			//ďđîđčńîâęŕ ÍÎÂŰŐ îáüĺęňîâ		
 			window.clear(Color(77, 58, 90));
+			window.draw(rectangle);
+			window.draw(selecT);
 			window.draw(Start_Btn);
 			window.draw(Left_Btn);
 			window.draw(Right_Btn);
@@ -93,6 +96,8 @@ public:
 
 			window.clear(Color(77, 58, 90));
 			window.draw(Start_Btn);
+			window.draw(rectangle);
+			window.draw(selecT);
 			window.draw(Left_Btn);
 			window.draw(Right_Btn);
 			window.draw(levels);
@@ -117,6 +122,8 @@ public:
 			f.close();
 
 			window.clear(Color(77, 58, 90));
+			window.draw(rectangle);
+			window.draw(selecT);
 			window.draw(Start_Btn);
 			window.draw(Left_Btn);
 			window.draw(Right_Btn);
