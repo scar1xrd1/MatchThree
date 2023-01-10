@@ -4,7 +4,9 @@
 class NavMenu
 {
 public:
-	void navigation(RenderWindow& window) {
+	void beep(int freq, int m) { Beep(freq, m); }
+
+	int navigation(RenderWindow& window) {
 
 		pos = Mouse::getPosition(window);
 
@@ -26,7 +28,7 @@ public:
 
 		//ĹŃËČ ÍŔĆŔŇŔ ĘÍÎĎĘŔ PLAY č îíŕ ŕęňčâíŕ
 		if (Play_Btn.getGlobalBounds().contains(pos.x, pos.y) && Play_Btn.getFillColor() != Color::Transparent) {
-
+			beep(600, 75);
 			//...ŇÓŇ ĘÎÄ ÇŔĎÓŃĘŔ ČĂĐŰ Ń ÓĐÎÂÍĹĚ 1
 			window.close();
 			cout << "game started";
@@ -34,13 +36,15 @@ public:
 
 		//ĹŃËČ íŕćŕňŕ ęíîďęŕ EXIT č îíŕ ŕęňčâíŕ
 		if (Exit_Btn.getGlobalBounds().contains(pos.x, pos.y) && Exit_Btn.getFillColor() != Color::Transparent) {
+			beep(600, 75);
 			window.close();
 			cout << "exit";
+			return -1;
 		}
 
 		//ĹŃËČ íŕćŕňŕ ęíîďęŕ LEVELS
 		if (Lvl_Btn.getGlobalBounds().contains(pos.x, pos.y) && Lvl_Btn.getFillColor() != Color::Transparent) {
-
+			beep(600, 75);
 			//Ńîçäŕĺě ďđîçđŕ÷íűé ôîí äë˙ ŃŇŔĐŰŐ îáüĺęňîâ
 			Play_Btn.setFillColor(Color::Transparent);
 			Play_Btn.setOutlineColor(Color::Transparent);
@@ -81,6 +85,12 @@ public:
 				num.setString(lvl_num);
 			}
 
+			beep(600, 75);
+
+			ofstream f("data/level.txt");
+			f << lvl_num;
+			f.close();
+
 			window.clear(Color(77, 58, 90));
 			window.draw(Start_Btn);
 			window.draw(Left_Btn);
@@ -96,10 +106,15 @@ public:
 
 		//ĘÍÎĎĘŔ - RIGHT
 		if (Right_Btn.getGlobalBounds().contains(pos.x, pos.y) && Right_Btn.getFillColor() != Color::Transparent) {
+			beep(600, 75);
 
-			n = n + 1;
+			if(n+1 != 11) n = n + 1;
 			lvl_num = to_string(n);
 			num.setString(lvl_num);
+
+			ofstream f("data/level.txt");
+			f << lvl_num;
+			f.close();
 
 			window.clear(Color(77, 58, 90));
 			window.draw(Start_Btn);
@@ -121,7 +136,9 @@ public:
 
 			}*/
 			cout << "Level selected";
+			beep(600, 75);
+			beep(750, 75);
 		}
-
+		return 0;
 	}
 };

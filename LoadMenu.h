@@ -4,6 +4,15 @@
 void LoadMenu(RenderWindow& window) {
 
 #pragma region SET PARAMETRS AND WINDOWS DRAW OBJECT
+	string line;
+
+	ifstream in("data/level.txt"); 
+	if (in.is_open()) {
+		while (getline(in, line)) {
+			lvl_num = line;
+			n = stoi(lvl_num);
+		}
+	}
 
 	window.clear(Color(77, 58, 90));
 
