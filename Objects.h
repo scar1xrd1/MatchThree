@@ -11,6 +11,7 @@ Font font;
 Text play; Text exit_t; Text level_t;
 Text levels; Text num; Text note;
 Text left_t; Text right_t; Text start;
+Text name; Text select;
 
 RectangleShape rectangle(Vector2f(600, 84));
 RectangleShape Play_Btn(Vector2f(270, 70));

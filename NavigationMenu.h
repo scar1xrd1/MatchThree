@@ -30,7 +30,6 @@ public:
 
 		//ЕСЛИ НАЖАТА КНОПКА PLAY и она активна
 		if (Play_Btn.getGlobalBounds().contains(pos.x, pos.y) && Play_Btn.getFillColor() != Color::Transparent) {
-
 			//...ТУТ КОД ЗАПУСКА ИГРЫ С УРОВНЕМ 1
 			window.close();
 			cout << "game started";
@@ -46,6 +45,7 @@ public:
 		if (Lvl_Btn.getGlobalBounds().contains(pos.x, pos.y) && Lvl_Btn.getFillColor() != Color::Transparent) {
 
 			//Создаем прозрачный фон для СТАРЫХ обьектов
+			name.setFillColor(Color::Transparent);
 			Play_Btn.setFillColor(Color::Transparent);
 			Play_Btn.setOutlineColor(Color::Transparent);
 			play.setFillColor(Color::Transparent);
@@ -58,6 +58,8 @@ public:
 
 			//прорисовка НОВЫХ обьектов		
 			window.clear(Color(77, 58, 90));
+			window.draw(rectangle);
+			window.draw(select);
 			window.draw(Start_Btn);
 			window.draw(Left_Btn);
 			window.draw(Right_Btn);
@@ -86,6 +88,8 @@ public:
 			}
 
 			window.clear(Color(77, 58, 90));
+			window.draw(rectangle);
+			window.draw(select);
 			window.draw(Start_Btn);
 			window.draw(Left_Btn);
 			window.draw(Right_Btn);
@@ -106,6 +110,8 @@ public:
 			num.setString(lvl_num);
 
 			window.clear(Color(77, 58, 90));
+			window.draw(rectangle);
+			window.draw(select);
 			window.draw(Start_Btn);
 			window.draw(Left_Btn);
 			window.draw(Right_Btn);
@@ -120,7 +126,7 @@ public:
 
 		//ЕСЛИ НАЖАТА КНОПКА PLAY и она активна
 		if (Start_Btn.getGlobalBounds().contains(pos.x, pos.y) && Start_Btn.getFillColor() != Color::Transparent) {
-			
+
 			//...ТУТ КОД ЗАПУСКА ИГРЫ С УРОВНЕМ n
 			/*void SelectLevel(int n) {
 

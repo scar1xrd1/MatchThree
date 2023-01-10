@@ -17,6 +17,7 @@ void RefreshMenu(RenderWindow& window) {
 	Exit_Btn.setFillColor(Color(197, 197, 197));
 	Exit_Btn.setOutlineColor(Color(240, 239, 243));
 
+	name.setFillColor(Color(255, 255, 255));
 	play.setFillColor(Color(255, 255, 255));
 	exit_t.setFillColor(Color(255, 255, 255));
 	level_t.setFillColor(Color(255, 255, 255));
@@ -30,7 +31,6 @@ void RefreshMenu(RenderWindow& window) {
 	Start_Btn.setFillColor(Color::Transparent);
 	Start_Btn.setOutlineColor(Color::Transparent);
 
-
 	levels.setFillColor(Color::Transparent);
 	num.setFillColor(Color::Transparent);
 	note.setFillColor(Color::Transparent);
@@ -42,6 +42,7 @@ void RefreshMenu(RenderWindow& window) {
 	window.draw(Play_Btn);
 	window.draw(Lvl_Btn);
 	window.draw(Exit_Btn);
+	window.draw(name);
 	window.draw(play);
 	window.draw(level_t);
 	window.draw(exit_t);
